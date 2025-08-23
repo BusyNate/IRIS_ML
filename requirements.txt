@@ -1,0 +1,10 @@
+# Core scientific and ML packages
+pandas
+numpy
+scikit-learn
+scipy
+matplotlib
+streamlit
+
+# Optional: for enhanced CSV handling and visualization
+seaborn

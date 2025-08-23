@@ -1,0 +1,207 @@
+<!-- Drowsiness Detection Project Wiki (Structured Markdown Version) -->
+<style>
+  body { background: #f8fafc; font-family: 'Segoe UI', Arial, sans-serif; }
+  .container { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px #0001; padding: 32px; margin: 32px auto; }
+  h1 { color: #1e293b; font-size: 2.5rem; margin-bottom: 0.5rem; letter-spacing: 1px; }
+  h2 { color: #334155; font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.25rem; }
+  h3 { color: #475569; font-size: 1.15rem; margin-top: 1.5rem; margin-bottom: 0.5rem; }
+  p { color: #374151; font-size: 1rem; line-height: 1.7; margin-bottom: 1rem; }
+  ul { margin-left: 1.5rem; margin-bottom: 1rem; }
+  li { margin-bottom: 0.5rem; color: #475569; }
+  pre { background: #f1f5f9; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; overflow-x: auto; }
+  code { font-family: 'Fira Mono', 'Consolas', monospace; font-size: 0.98rem; color: #0f172a; }
+  hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+  .list-disc li strong { color: #2563eb; }
+  .toc { background: #f1f5f9; border-radius: 8px; padding: 1rem 1.5rem; margin-bottom: 2rem; }
+  .toc-title { font-weight: bold; color: #334155; margin-bottom: 0.5rem; }
+  .toc-list { list-style: none; padding-left: 0; }
+  .toc-list li { margin-bottom: 0.4rem; }
+  .toc-list a { color: #2563eb; text-decoration: none; font-weight: 500; }
+  .toc-list a:hover { text-decoration: underline; }
+  .pipeline-diagram { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; margin-bottom: 2rem; gap: 0.5rem; max-width: 100%; overflow-x: auto; }
+  .pipeline-box { background: #e0e7ef; border-radius: 8px; padding: 0.75rem 1.5rem; margin: 0; color: #334155; font-weight: 500; box-shadow: 0 1px 4px #0001; transition: background 0.2s; white-space: nowrap; }
+  .pipeline-arrow { font-size: 1.5rem; color: #2563eb; margin: 0; }
+  .pipeline-box:hover { background: #c7d2fe; }
+</style>
+<div class="container">
+  <div class="toc">
+    <div class="toc-title">Table of Contents</div>
+    <ul class="toc-list">
+      <li><a href="#overview">Project Overview</a></li>
+      <li><a href="#acquisition">1. Data Acquisition</a></li>
+      <li><a href="#cleansing">2. Data Cleansing</a></li>
+      <li><a href="#features">3. Feature Extraction</a></li>
+      <li><a href="#modeling">4. Machine Learning Modeling</a></li>
+      <li><a href="#tuning">5. Model Tuning</a></li>
+      <li><a href="#storage">6. Data Storage</a></li>
+      <li><a href="#deployment">7. Deployment & Visualization</a></li>
+      <li><a href="#concerns">8. Areas of Concern and Research</a></li>
+      <li><a href="#glossary">Glossary</a></li>
+    </ul>
+  </div>
+  <div class="pipeline-diagram">
+    <a href="#acquisition" class="pipeline-box" title="Go to Data Acquisition">Acquisition</a>
+    <span class="pipeline-arrow">→</span>
+    <a href="#cleansing" class="pipeline-box" title="Go to Data Cleansing">Cleansing</a>
+    <span class="pipeline-arrow">→</span>
+    <a href="#features" class="pipeline-box" title="Go to Feature Extraction">Features</a>
+    <span class="pipeline-arrow">→</span>
+    <a href="#modeling" class="pipeline-box" title="Go to Modeling">Modeling</a>
+    <span class="pipeline-arrow">→</span>
+    <a href="#tuning" class="pipeline-box" title="Go to Tuning">Tuning</a>
+    <span class="pipeline-arrow">→</span>
+    <a href="#storage" class="pipeline-box" title="Go to Storage">Storage</a>
+    <span class="pipeline-arrow">→</span>
+    <a href="#deployment" class="pipeline-box" title="Go to Deployment">Deployment</a>
+  </div>
+  <section>
+    <h1 id="overview" class="text-4xl font-bold text-gray-800 mb-2">Drowsiness Detection Project Wiki (Structured)</h1>
+    <h2 id="overview" class="text-2xl font-semibold text-gray-800 mb-4">Project Overview</h2>
+    <p class="mb-6 text-gray-700">The goal is to build two independent machine learning models for detecting drowsiness in users wearing IRIS glasses. One model analyzes head movement, and the other analyzes blinking. Each model extracts features from sensor data and outputs a prediction score ranging from 0.1 (alert) to 0.9 (severely drowsy).</p>
+    <hr class="my-8 border-gray-200">
+    <h2 id="acquisition" class="text-xl font-semibold text-gray-800 mb-4">1. Data Acquisition</h2>
+    <h3 class="text-lg font-semibold text-gray-800 mb-2">1.1 Head Movement (Accelerometer)</h3>
+    <p class="mb-4 text-gray-700">Vertical head movement is measured using the Y-axis of an accelerometer. The sensor samples data at a fixed rate (e.g., 50 Hz), capturing subtle nods and tilts. Data is exported to a CSV file for reproducibility and ease of analysis.</p>
+    <pre><code># Load head movement data from CSV
+import pandas as pd
+# The CSV should have a column 'accel_y' for vertical acceleration
+head_df = pd.read_csv('headmovement.csv')
+y_accel = head_df['accel_y']  # Series of Y-axis acceleration values
+</code></pre>
+    <h3 class="text-lg font-semibold text-gray-800 mb-2">1.2 Blinking (Photodiode)</h3>
+    <p class="mb-4 text-gray-700">Blinking is measured using a photodiode sensor, which detects rapid changes in light intensity caused by eyelid movement. The sensor samples data at the same rate as the accelerometer for synchronization. Data is saved in a CSV file for further processing.</p>
+    <pre><code># Load blinking data from CSV
+blink_df = pd.read_csv('blinking.csv')
+pd_signal = blink_df['photodiode']  # Series of photodiode readings
+</code></pre>
+    <hr class="my-8 border-gray-200">
+    <h2 id="cleansing" class="text-xl font-semibold text-gray-800 mb-4">2. Data Cleansing</h2>
+    <h3 class="text-lg font-semibold text-gray-800 mb-2">Description</h3>
+    <p class="mb-4 text-gray-700">Raw sensor data contains noise and values on different scales, which can impact feature extraction and model performance. Data cleansing normalizes the scale and removes noise, ensuring reliable and comparable data for machine learning.</p>
+    <h3 class="text-lg font-semibold text-gray-800 mb-2">Process Description</h3>
+    <p class="mb-4 text-gray-700">MinMaxScaler normalizes the photodiode signal to a [0, 1] range. A low-pass Butterworth filter removes high-frequency noise from both accelerometer and photodiode signals, isolating relevant changes for feature extraction.</p>
+    <pre><code># Scale photodiode signal
+from sklearn.preprocessing import MinMaxScaler
+scaler = MinMaxScaler()
+pd_signal_scaled = scaler.fit_transform(pd_signal.values.reshape(-1, 1)).flatten()
+
+# Low-pass filter
+from scipy.signal import butter, filtfilt
+b, a = butter(N=2, Wn=2, fs=50, btype='low')
+y_filtered = filtfilt(b, a, y_accel)
+pd_signal_filtered = filtfilt(b, a, pd_signal_scaled)
+</code></pre>
+    <h2 id="features" class="text-xl font-semibold text-gray-800 mb-4">3. Feature Extraction</h2>
+    <h3 class="text-lg font-semibold text-gray-800 mb-2">Description</h3>
+    <p class="mb-4 text-gray-700">Feature extraction transforms cleansed sensor data into variables for machine learning. Head nod and blink counts in fixed time windows are used as indicators of drowsiness.</p>
+    <h3 class="text-lg font-semibold text-gray-800 mb-2">Process Description</h3>
+    <p class="mb-4 text-gray-700">Filtered signals are divided into 30-second windows. Nods and blinks are counted by detecting downward threshold crossings, converting continuous data into discrete features for classification.</p>
+    <pre><code># Head nod feature extraction
+import pandas as pd
+window_size = 30 * 50
+nod_threshold = -2.0
+nods_per_window = []
+for start in range(0, len(y_filtered), window_size):
+    window = y_filtered[start:start + window_size]
+    nods = ((window < nod_threshold) & (pd.Series(window).shift(1) >= nod_threshold)).sum()
+    nods_per_window.append(nods)
+
+# Blink feature extraction
+blink_threshold = 0.5
+blinks_per_window = []
+for start in range(0, len(pd_signal_filtered), window_size):
+    window = pd_signal_filtered[start:start + window_size]
+    blinks = ((window < blink_threshold) & (pd.Series(window).shift(1) >= blink_threshold)).sum()
+    blinks_per_window.append(blinks)
+</code></pre>
+    <h2 id="modeling" class="text-xl font-semibold text-gray-800 mb-4">4. Machine Learning Modeling</h2>
+    <h3 class="text-lg font-semibold text-gray-800 mb-2">Description</h3>
+    <p class="mb-4 text-gray-700">Machine learning modeling uses extracted features to predict drowsiness levels. Multinomial logistic regression is used for multi-class classification. The model outputs a drowsiness score mapped to three categories: alert, drowsy, and severely drowsy.</p>
+    <h3 class="text-lg font-semibold text-gray-800 mb-2">Process Description</h3>
+    <p class="mb-4 text-gray-700">Drowsiness scores are categorized into three classes based on thresholds. Nod and blink counts per window are used as input features. The logistic regression model is trained and evaluated using accuracy and confusion matrix metrics.</p>
+    <pre><code># Categorize drowsiness scores
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, confusion_matrix
+
+def categorize(score):
+    if score <= 0.3:
+        return 0
+    elif score <= 0.6:
+        return 1
+    else:
+        return 2
+
+y_cat = [categorize(score) for score in y]
+X = [[nods, blinks] for nods, blinks in zip(nods_per_window, blinks_per_window)]
+
+model = LogisticRegression(multi_class='multinomial', max_iter=200)
+model.fit(X, y_cat)
+y_pred = model.predict(X)
+print("Accuracy:", accuracy_score(y_cat, y_pred))
+print("Confusion Matrix:\n", confusion_matrix(y_cat, y_pred))
+</code></pre>
+    <h2 id="tuning" class="text-xl font-semibold text-gray-800 mb-4">5. Model Tuning</h2>
+    <h3 class="text-lg font-semibold text-gray-800 mb-2">Description</h3>
+    <p class="mb-4 text-gray-700">Model tuning optimizes detection thresholds and regularization strength. Adjusting nod and blink thresholds changes feature sensitivity. Regularization (parameter C) prevents overfitting.</p>
+    <h3 class="text-lg font-semibold text-gray-800 mb-2">Process Description</h3>
+    <p class="mb-4 text-gray-700">Different values for nod and blink thresholds are tested for sensitivity and specificity. Regularization strength (C) is tuned to balance bias and variance. Each configuration is evaluated using model metrics.</p>
+    <pre><code># Tune thresholds and regularization
+nod_threshold = -2.0  # Try -1.5, -2.0, -2.5
+blink_threshold = 0.5 # Try 0.4, 0.5, 0.6
+
+model = LogisticRegression(C=1.0, multi_class='multinomial', max_iter=200)
+model.fit(X, y_cat)
+</code></pre>
+    <h2 id="storage" class="text-xl font-semibold text-gray-800 mb-4">6. Data Storage</h2>
+    <h3 class="text-lg font-semibold text-gray-800 mb-2">Description</h3>
+    <p class="mb-4 text-gray-700">Storing predictions with timestamps enables traceability and analysis. Both head movement and blink predictions are paired before saving. Data is stored in a CSV file for downstream processing.</p>
+    <h3 class="text-lg font-semibold text-gray-800 mb-2">Process Description</h3>
+    <p class="mb-4 text-gray-700">A buffer function waits for both predictions before writing to the CSV file. Each row contains a timestamp, head movement prediction, and blink prediction. This structure supports time-series analysis and integration with other systems.</p>
+    <pre><code>import csv
+from datetime import datetime
+
+def store_predictions(head_pred, blink_pred):
+    timestamp = datetime.now().isoformat()
+    with open('predictions.csv', 'a', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow([timestamp, head_pred, blink_pred])
+</code></pre>
+    <h2 id="deployment" class="text-xl font-semibold text-gray-800 mb-4">7. Deployment & Visualization</h2>
+    <h3 class="text-lg font-semibold text-gray-800 mb-2">Description</h3>
+    <p class="mb-4 text-gray-700">Deployment presents model outputs in a user-friendly format. Visualization supports interpretation and monitoring of drowsiness levels. Streamlit is used to build an interactive dashboard.</p>
+    <h3 class="text-lg font-semibold text-gray-800 mb-2">Process Description</h3>
+    <p class="mb-4 text-gray-700">The Streamlit app displays nod and blink predictions side by side. Users input values and view results instantly. This interface supports demonstration and monitoring.</p>
+    <pre><code>import streamlit as st
+
+st.title("Drowsiness Detection Visualization")
+nods = st.number_input("Nods per minute", min_value=0)
+blinks = st.number_input("Blinks per minute", min_value=0)
+
+if st.button("Show Prediction"):
+    st.write(f"Nods: {nods} | Blinks: {blinks}")
+    # Chart or category display can be added
+</code></pre>
+    <hr class="my-8 border-gray-200">
+    <h2 id="concerns" class="text-xl font-semibold text-gray-800 mb-4">8. Areas of Concern and Research</h2>
+    <ul class="list-disc list-inside mb-4 text-gray-700">
+      <li><strong>Labeling for Data:</strong> Reliable ground truth labels are needed for supervised learning. Consider self-reports, expert annotation, or controlled experiments.</li>
+      <li><strong>Threshold Selection:</strong> Thresholds for nod and blink detection should be tuned for each user and sensor setup.</li>
+      <li><strong>Sampling Rate Consistency:</strong> Ensure all sensors use the same sampling rate, or resample data to align windows.</li>
+      <li><strong>Model Evaluation:</strong> Use accuracy, confusion matrix, and other metrics to assess model performance. Consider multi-class evaluation for the three drowsiness categories.</li>
+    </ul>
+    <hr class="my-8 border-gray-200">
+    <h2 id="glossary" class="text-xl font-semibold text-gray-800 mb-4">Glossary</h2>
+    <ul class="list-disc list-inside mb-4 text-gray-700">
+      <li><strong>Accelerometer:</strong> Sensor measuring linear acceleration, used for head movement detection.</li>
+      <li><strong>Photodiode:</strong> Sensor detecting changes in light intensity, used for blink detection.</li>
+      <li><strong>Low-pass filter:</strong> Removes high-frequency noise from signals.</li>
+      <li><strong>MinMaxScaler:</strong> Scales features to a consistent range.</li>
+      <li><strong>Threshold crossing:</strong> Detects events by checking when a signal passes a set value.</li>
+      <li><strong>Feature extraction:</strong> Deriving meaningful variables (e.g., nod count, blink count) from raw data.</li>
+      <li><strong>Logistic regression:</strong> ML algorithm for classification, modeling the probability of an event.</li>
+      <li><strong>Regularization:</strong> Technique to prevent overfitting in ML models.</li>
+      <li><strong>CSV:</strong> File format for storing tabular data.</li>
+      <li><strong>Streamlit:</strong> Python library for building interactive data apps.</li>
+    </ul>
+  </section>
+</div>
