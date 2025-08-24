@@ -5,6 +5,7 @@ scikit-learn
 scipy
 matplotlib
 streamlit
+tensorflow
 
 # Optional: for enhanced CSV handling and visualization
 seaborn

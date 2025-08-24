@@ -1,4 +1,4 @@
-<!-- Drowsiness Detection Project Wiki (Structured Markdown Version) -->
+<!-- Drowsiness Detection Project Wiki (Structured Markdown Version, CNN+LSTM Update) -->
 <style>
   body { background: #f8fafc; font-family: 'Segoe UI', Arial, sans-serif; }
   .container { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px #0001; padding: 32px; margin: 32px auto; }
@@ -31,7 +31,7 @@
       <li><a href="#acquisition">1. Data Acquisition</a></li>
       <li><a href="#cleansing">2. Data Cleansing</a></li>
       <li><a href="#features">3. Feature Extraction</a></li>
-      <li><a href="#modeling">4. Machine Learning Modeling</a></li>
+      <li><a href="#modeling">4. Deep Learning Modeling (CNN+LSTM)</a></li>
       <li><a href="#tuning">5. Model Tuning</a></li>
       <li><a href="#storage">6. Data Storage</a></li>
       <li><a href="#deployment">7. Deployment & Visualization</a></li>
@@ -46,7 +46,7 @@
     <span class="pipeline-arrow">→</span>
     <a href="#features" class="pipeline-box" title="Go to Feature Extraction">Features</a>
     <span class="pipeline-arrow">→</span>
-    <a href="#modeling" class="pipeline-box" title="Go to Modeling">Modeling</a>
+    <a href="#modeling" class="pipeline-box" title="Go to Modeling">Modeling (CNN+LSTM)</a>
     <span class="pipeline-arrow">→</span>
     <a href="#tuning" class="pipeline-box" title="Go to Tuning">Tuning</a>
     <span class="pipeline-arrow">→</span>
@@ -55,109 +55,142 @@
     <a href="#deployment" class="pipeline-box" title="Go to Deployment">Deployment</a>
   </div>
   <section>
-    <h1 id="overview" class="text-4xl font-bold text-gray-800 mb-2">Drowsiness Detection Project Wiki (Structured)</h1>
-    <h2 id="overview" class="text-2xl font-semibold text-gray-800 mb-4">Project Overview</h2>
-    <p class="mb-6 text-gray-700">The goal is to build two independent machine learning models for detecting drowsiness in users wearing IRIS glasses. One model analyzes head movement, and the other analyzes blinking. Each model extracts features from sensor data and outputs a prediction score ranging from 0.1 (alert) to 0.9 (severely drowsy).</p>
-    <hr class="my-8 border-gray-200">
-    <h2 id="acquisition" class="text-xl font-semibold text-gray-800 mb-4">1. Data Acquisition</h2>
-    <h3 class="text-lg font-semibold text-gray-800 mb-2">1.1 Head Movement (Accelerometer)</h3>
-    <p class="mb-4 text-gray-700">Vertical head movement is measured using the Y-axis of an accelerometer. The sensor samples data at a fixed rate (e.g., 50 Hz), capturing subtle nods and tilts. Data is exported to a CSV file for reproducibility and ease of analysis.</p>
-    <pre><code># Load head movement data from CSV
+    <h1 id="overview">Drowsiness Detection Project Wiki (Structured)</h1>
+    <h2 id="overview">Project Overview</h2>
+    <p>
+      This project builds two independent deep learning models for drowsiness detection in users wearing IRIS glasses. Data is transmitted from an IoT device via Bluetooth, split into photodiode (blinking) and head movement (accelerometer) sets, cleansed, and fed to separate CNN+LSTM models. Each model outputs a drowsiness score (0.1–0.9) for real-time monitoring and classification.
+    </p>
+    <hr>
+    <h2 id="acquisition">1. Data Acquisition</h2>
+    <h3>1.1 Head Movement (Accelerometer)</h3>
+    <p>
+      Accelerometer data is collected from the IoT device, measuring vertical head movement (Y-axis). Sampling at a fixed rate (e.g., 50 Hz) captures nodding and tilting patterns. Data is stored in CSV format for reproducibility and analysis.
+    </p>
+    <h4>Process Description</h4>
+    <p>
+      The following code loads Y-axis acceleration data from a CSV file. This prepares the raw sensor data for cleansing and feature extraction.
+    </p>
+    <pre><code>
 import pandas as pd
-# The CSV should have a column 'accel_y' for vertical acceleration
-head_df = pd.read_csv('headmovement.csv')
-y_accel = head_df['accel_y']  # Series of Y-axis acceleration values
-</code></pre>
-    <h3 class="text-lg font-semibold text-gray-800 mb-2">1.2 Blinking (Photodiode)</h3>
-    <p class="mb-4 text-gray-700">Blinking is measured using a photodiode sensor, which detects rapid changes in light intensity caused by eyelid movement. The sensor samples data at the same rate as the accelerometer for synchronization. Data is saved in a CSV file for further processing.</p>
-    <pre><code># Load blinking data from CSV
-blink_df = pd.read_csv('blinking.csv')
-pd_signal = blink_df['photodiode']  # Series of photodiode readings
-</code></pre>
-    <hr class="my-8 border-gray-200">
-    <h2 id="cleansing" class="text-xl font-semibold text-gray-800 mb-4">2. Data Cleansing</h2>
-    <h3 class="text-lg font-semibold text-gray-800 mb-2">Description</h3>
-    <p class="mb-4 text-gray-700">Raw sensor data contains noise and values on different scales, which can impact feature extraction and model performance. Data cleansing normalizes the scale and removes noise, ensuring reliable and comparable data for machine learning.</p>
-    <h3 class="text-lg font-semibold text-gray-800 mb-2">Process Description</h3>
-    <p class="mb-4 text-gray-700">MinMaxScaler normalizes the photodiode signal to a [0, 1] range. A low-pass Butterworth filter removes high-frequency noise from both accelerometer and photodiode signals, isolating relevant changes for feature extraction.</p>
-    <pre><code># Scale photodiode signal
+head_df = pd.read_csv('headmovement.csv')  # Load CSV with 'accel_y' column
+y_accel = head_df['accel_y']               # Extract Y-axis acceleration
+    </code></pre>
+    <h3>1.2 Blinking (Photodiode)</h3>
+    <p>
+      Photodiode data is collected to measure blinking events. The sensor records ADC values representing light intensity changes caused by eyelid movement. Data is sampled at the same rate as the accelerometer and stored in CSV format.
+    </p>
+    <h4>Process Description</h4>
+    <p>
+      The code below loads photodiode ADC data from a CSV file, preparing the raw signal for cleansing and feature extraction.
+    </p>
+    <pre><code>
+blink_df = pd.read_csv('blinking.csv')     # Load CSV with 'photodiode' column
+pd_signal = blink_df['photodiode']         # Extract photodiode ADC values
+    </code></pre>
+    <hr>
+    <h2 id="cleansing">2. Data Cleansing</h2>
+    <h3>Description</h3>
+    <p>
+      Raw sensor data contains noise and values on different scales, which can obscure meaningful patterns and hinder model performance. Data cleansing normalizes the scale and removes noise, ensuring reliable and comparable data for deep learning.
+    </p>
+    <h3>Process Description</h3>
+    <p>
+      MinMaxScaler normalizes the photodiode signal to a [0, 1] range. A low-pass Butterworth filter removes high-frequency noise from both accelerometer and photodiode signals, isolating relevant changes for feature extraction. These steps produce clean, normalized signals for the CNN+LSTM models.
+    </p>
+    <pre><code>
 from sklearn.preprocessing import MinMaxScaler
-scaler = MinMaxScaler()
-pd_signal_scaled = scaler.fit_transform(pd_signal.values.reshape(-1, 1)).flatten()
-
-# Low-pass filter
 from scipy.signal import butter, filtfilt
-b, a = butter(N=2, Wn=2, fs=50, btype='low')
-y_filtered = filtfilt(b, a, y_accel)
-pd_signal_filtered = filtfilt(b, a, pd_signal_scaled)
-</code></pre>
-    <h2 id="features" class="text-xl font-semibold text-gray-800 mb-4">3. Feature Extraction</h2>
-    <h3 class="text-lg font-semibold text-gray-800 mb-2">Description</h3>
-    <p class="mb-4 text-gray-700">Feature extraction transforms cleansed sensor data into variables for machine learning. Head nod and blink counts in fixed time windows are used as indicators of drowsiness.</p>
-    <h3 class="text-lg font-semibold text-gray-800 mb-2">Process Description</h3>
-    <p class="mb-4 text-gray-700">Filtered signals are divided into 30-second windows. Nods and blinks are counted by detecting downward threshold crossings, converting continuous data into discrete features for classification.</p>
-    <pre><code># Head nod feature extraction
-import pandas as pd
-window_size = 30 * 50
-nod_threshold = -2.0
-nods_per_window = []
-for start in range(0, len(y_filtered), window_size):
-    window = y_filtered[start:start + window_size]
-    nods = ((window < nod_threshold) & (pd.Series(window).shift(1) >= nod_threshold)).sum()
-    nods_per_window.append(nods)
 
-# Blink feature extraction
-blink_threshold = 0.5
-blinks_per_window = []
-for start in range(0, len(pd_signal_filtered), window_size):
-    window = pd_signal_filtered[start:start + window_size]
-    blinks = ((window < blink_threshold) & (pd.Series(window).shift(1) >= blink_threshold)).sum()
-    blinks_per_window.append(blinks)
-</code></pre>
-    <h2 id="modeling" class="text-xl font-semibold text-gray-800 mb-4">4. Machine Learning Modeling</h2>
-    <h3 class="text-lg font-semibold text-gray-800 mb-2">Description</h3>
-    <p class="mb-4 text-gray-700">Machine learning modeling uses extracted features to predict drowsiness levels. Multinomial logistic regression is used for multi-class classification. The model outputs a drowsiness score mapped to three categories: alert, drowsy, and severely drowsy.</p>
-    <h3 class="text-lg font-semibold text-gray-800 mb-2">Process Description</h3>
-    <p class="mb-4 text-gray-700">Drowsiness scores are categorized into three classes based on thresholds. Nod and blink counts per window are used as input features. The logistic regression model is trained and evaluated using accuracy and confusion matrix metrics.</p>
-    <pre><code># Categorize drowsiness scores
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, confusion_matrix
+scaler = MinMaxScaler()
+pd_signal_scaled = scaler.fit_transform(pd_signal.values.reshape(-1, 1)).flatten()  # Scale photodiode
 
-def categorize(score):
-    if score <= 0.3:
-        return 0
-    elif score <= 0.6:
-        return 1
-    else:
-        return 2
+b, a = butter(N=2, Wn=2, fs=50, btype='low')  # Design low-pass filter
+y_filtered = filtfilt(b, a, y_accel)           # Filter head movement
+pd_signal_filtered = filtfilt(b, a, pd_signal_scaled)  # Filter photodiode
+    </code></pre>
+    <hr>
+    <h2 id="features">3. Feature Extraction</h2>
+    <h3>Description</h3>
+    <p>
+      Feature extraction transforms cleansed sensor data into variables for deep learning. For CNN+LSTM models, time-series windows (e.g., 30 seconds) are used as input sequences. Head nod and blink counts, or raw windowed signals, serve as indicators of drowsiness.
+    </p>
+    <h3>Process Description</h3>
+    <p>
+      Filtered signals are divided into 30-second windows. For classical ML, nods and blinks are counted by detecting downward threshold crossings. For CNN+LSTM, windowed sequences are reshaped for model input. This prepares the data for temporal pattern recognition.
+    </p>
+    <pre><code>
+import numpy as np
+window_size = 30 * 50  # 30 seconds * 50 Hz
 
-y_cat = [categorize(score) for score in y]
-X = [[nods, blinks] for nods, blinks in zip(nods_per_window, blinks_per_window)]
+# Reshape head movement data into windows for CNN+LSTM
+head_windows = np.array([y_filtered[i:i+window_size] for i in range(0, len(y_filtered)-window_size, window_size)])
 
-model = LogisticRegression(multi_class='multinomial', max_iter=200)
-model.fit(X, y_cat)
-y_pred = model.predict(X)
-print("Accuracy:", accuracy_score(y_cat, y_pred))
-print("Confusion Matrix:\n", confusion_matrix(y_cat, y_pred))
-</code></pre>
-    <h2 id="tuning" class="text-xl font-semibold text-gray-800 mb-4">5. Model Tuning</h2>
-    <h3 class="text-lg font-semibold text-gray-800 mb-2">Description</h3>
-    <p class="mb-4 text-gray-700">Model tuning optimizes detection thresholds and regularization strength. Adjusting nod and blink thresholds changes feature sensitivity. Regularization (parameter C) prevents overfitting.</p>
-    <h3 class="text-lg font-semibold text-gray-800 mb-2">Process Description</h3>
-    <p class="mb-4 text-gray-700">Different values for nod and blink thresholds are tested for sensitivity and specificity. Regularization strength (C) is tuned to balance bias and variance. Each configuration is evaluated using model metrics.</p>
-    <pre><code># Tune thresholds and regularization
-nod_threshold = -2.0  # Try -1.5, -2.0, -2.5
-blink_threshold = 0.5 # Try 0.4, 0.5, 0.6
+# Reshape photodiode data into windows for CNN+LSTM
+blink_windows = np.array([pd_signal_filtered[i:i+window_size] for i in range(0, len(pd_signal_filtered)-window_size, window_size)])
+    </code></pre>
+    <hr>
+    <h2 id="modeling">4. Deep Learning Modeling (CNN+LSTM)</h2>
+    <h3>Description</h3>
+    <p>
+      Deep learning models combine convolutional layers (CNN) for spatial feature extraction and LSTM layers for temporal sequence learning. Each model receives windowed time-series data and outputs a drowsiness score (0.1–0.9). Separate models are built for head movement and blinking.
+    </p>
+    <h3>Process Description</h3>
+    <p>
+      The following code defines a simple CNN+LSTM model using TensorFlow/Keras. The model accepts windowed sensor data, applies convolutional filters, and learns temporal dependencies with LSTM. The output is a regression score for drowsiness prediction.
+    </p>
+    <pre><code>
+import tensorflow as tf
+from tensorflow.keras import layers, models
 
-model = LogisticRegression(C=1.0, multi_class='multinomial', max_iter=200)
-model.fit(X, y_cat)
-</code></pre>
-    <h2 id="storage" class="text-xl font-semibold text-gray-800 mb-4">6. Data Storage</h2>
-    <h3 class="text-lg font-semibold text-gray-800 mb-2">Description</h3>
-    <p class="mb-4 text-gray-700">Storing predictions with timestamps enables traceability and analysis. Both head movement and blink predictions are paired before saving. Data is stored in a CSV file for downstream processing.</p>
-    <h3 class="text-lg font-semibold text-gray-800 mb-2">Process Description</h3>
-    <p class="mb-4 text-gray-700">A buffer function waits for both predictions before writing to the CSV file. Each row contains a timestamp, head movement prediction, and blink prediction. This structure supports time-series analysis and integration with other systems.</p>
-    <pre><code>import csv
+def build_cnn_lstm(input_shape):
+    model = models.Sequential([
+        layers.Conv1D(32, kernel_size=3, activation='relu', input_shape=input_shape),
+        layers.MaxPooling1D(pool_size=2),
+        layers.Conv1D(64, kernel_size=3, activation='relu'),
+        layers.MaxPooling1D(pool_size=2),
+        layers.LSTM(64, return_sequences=False),
+        layers.Dense(1, activation='sigmoid')  # Output between 0 and 1
+    ])
+    model.compile(optimizer='adam', loss='mse', metrics=['mae'])
+    return model
+
+# Example usage:
+# input_shape = (window_size, 1)
+# head_model = build_cnn_lstm((window_size, 1))
+# blink_model = build_cnn_lstm((window_size, 1))
+    </code></pre>
+    <hr>
+    <h2 id="tuning">5. Model Tuning</h2>
+    <h3>Description</h3>
+    <p>
+      Model tuning optimizes architecture and training parameters. Key parameters include window size, number of convolutional filters, LSTM units, learning rate, and regularization. Proper tuning improves accuracy and generalization.
+    </p>
+    <h3>Process Description</h3>
+    <p>
+      Hyperparameters are adjusted and models are retrained to find the best configuration. Validation metrics (e.g., MAE, loss) are monitored to avoid overfitting. Grid search or manual tuning can be used to select optimal values.
+    </p>
+    <pre><code>
+# Example: Tune number of filters and LSTM units
+model = models.Sequential([
+    layers.Conv1D(64, kernel_size=5, activation='relu', input_shape=(window_size, 1)),  # More filters
+    layers.MaxPooling1D(pool_size=2),
+    layers.LSTM(128, return_sequences=False),  # More LSTM units
+    layers.Dense(1, activation='sigmoid')
+])
+model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001), loss='mse')
+    </code></pre>
+    <hr>
+    <h2 id="storage">6. Data Storage</h2>
+    <h3>Description</h3>
+    <p>
+      Storing predictions with timestamps enables traceability and analysis. Both head movement and blink predictions are paired before saving. Data is stored in a CSV file for downstream processing.
+    </p>
+    <h3>Process Description</h3>
+    <p>
+      A buffer function waits for both predictions before writing to the CSV file. Each row contains a timestamp, head movement prediction, and blink prediction. This structure supports time-series analysis and integration with other systems.
+    </p>
+    <pre><code>
+import csv
 from datetime import datetime
 
 def store_predictions(head_pred, blink_pred):
@@ -165,13 +198,19 @@ def store_predictions(head_pred, blink_pred):
     with open('predictions.csv', 'a', newline='') as f:
         writer = csv.writer(f)
         writer.writerow([timestamp, head_pred, blink_pred])
-</code></pre>
-    <h2 id="deployment" class="text-xl font-semibold text-gray-800 mb-4">7. Deployment & Visualization</h2>
-    <h3 class="text-lg font-semibold text-gray-800 mb-2">Description</h3>
-    <p class="mb-4 text-gray-700">Deployment presents model outputs in a user-friendly format. Visualization supports interpretation and monitoring of drowsiness levels. Streamlit is used to build an interactive dashboard.</p>
-    <h3 class="text-lg font-semibold text-gray-800 mb-2">Process Description</h3>
-    <p class="mb-4 text-gray-700">The Streamlit app displays nod and blink predictions side by side. Users input values and view results instantly. This interface supports demonstration and monitoring.</p>
-    <pre><code>import streamlit as st
+    </code></pre>
+    <hr>
+    <h2 id="deployment">7. Deployment & Visualization</h2>
+    <h3>Description</h3>
+    <p>
+      Deployment presents model outputs in a user-friendly format. Visualization supports interpretation and monitoring of drowsiness levels. Streamlit is used to build an interactive dashboard.
+    </p>
+    <h3>Process Description</h3>
+    <p>
+      The Streamlit app displays nod and blink predictions side by side. Users input values and view results instantly. This interface supports demonstration and monitoring.
+    </p>
+    <pre><code>
+import streamlit as st
 
 st.title("Drowsiness Detection Visualization")
 nods = st.number_input("Nods per minute", min_value=0)
@@ -180,17 +219,18 @@ blinks = st.number_input("Blinks per minute", min_value=0)
 if st.button("Show Prediction"):
     st.write(f"Nods: {nods} | Blinks: {blinks}")
     # Chart or category display can be added
-</code></pre>
-    <hr class="my-8 border-gray-200">
-    <h2 id="concerns" class="text-xl font-semibold text-gray-800 mb-4">8. Areas of Concern and Research</h2>
+    </code></pre>
+    <hr>
+    <h2 id="concerns">8. Areas of Concern and Research</h2>
     <ul class="list-disc list-inside mb-4 text-gray-700">
       <li><strong>Labeling for Data:</strong> Reliable ground truth labels are needed for supervised learning. Consider self-reports, expert annotation, or controlled experiments.</li>
       <li><strong>Threshold Selection:</strong> Thresholds for nod and blink detection should be tuned for each user and sensor setup.</li>
       <li><strong>Sampling Rate Consistency:</strong> Ensure all sensors use the same sampling rate, or resample data to align windows.</li>
-      <li><strong>Model Evaluation:</strong> Use accuracy, confusion matrix, and other metrics to assess model performance. Consider multi-class evaluation for the three drowsiness categories.</li>
+      <li><strong>Model Evaluation:</strong> Use MAE, loss, and other metrics to assess model performance. Consider regression and classification evaluation for drowsiness scores.</li>
+      <li><strong>Hyperparameter Optimization:</strong> Explore grid search, random search, or Bayesian optimization for tuning CNN+LSTM architectures.</li>
     </ul>
-    <hr class="my-8 border-gray-200">
-    <h2 id="glossary" class="text-xl font-semibold text-gray-800 mb-4">Glossary</h2>
+    <hr>
+    <h2 id="glossary">Glossary</h2>
     <ul class="list-disc list-inside mb-4 text-gray-700">
       <li><strong>Accelerometer:</strong> Sensor measuring linear acceleration, used for head movement detection.</li>
       <li><strong>Photodiode:</strong> Sensor detecting changes in light intensity, used for blink detection.</li>
@@ -198,10 +238,12 @@ if st.button("Show Prediction"):
       <li><strong>MinMaxScaler:</strong> Scales features to a consistent range.</li>
       <li><strong>Threshold crossing:</strong> Detects events by checking when a signal passes a set value.</li>
       <li><strong>Feature extraction:</strong> Deriving meaningful variables (e.g., nod count, blink count) from raw data.</li>
-      <li><strong>Logistic regression:</strong> ML algorithm for classification, modeling the probability of an event.</li>
-      <li><strong>Regularization:</strong> Technique to prevent overfitting in ML models.</li>
-      <li><strong>CSV:</strong> File format for storing tabular data.</li>
+      <li><strong>CNN (Convolutional Neural Network):</strong> Deep learning architecture for spatial feature extraction.</li>
+      <li><strong>LSTM (Long Short-Term Memory):</strong> Neural network layer for learning temporal dependencies in sequences.</li>
+      <li><strong>Hyperparameter:</strong> Model configuration value set before training (e.g., learning rate, filter size).</li>
+      <li><strong>MAE (Mean Absolute Error):</strong> Metric for regression model accuracy.</li>
       <li><strong>Streamlit:</strong> Python library for building interactive data apps.</li>
+      <li><strong>CSV:</strong> File format for storing tabular data.</li>
     </ul>
   </section>
 </div>

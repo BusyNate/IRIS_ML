@@ -1,6 +1,7 @@
 # Python virtual environments
 .venv/
 venv/
+.venv
 
 # Bytecode and cache
 __pycache__/
@@ -29,3 +30,5 @@ Thumbs.db
 # OS/Editor swap files
 *.swp
 *.swo
+
+# pip modules
