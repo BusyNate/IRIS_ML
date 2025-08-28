@@ -1,19 +1,19 @@
-#MPU6050 Drowsiness Prediction Model
-
+**MPU6050 Drowsiness Prediction Model
+**
 This branch contains a LogisticRegression model built for MPU6050 sensor data. The model has been trained and tested using mock data, achieving 100% cross-validated accuracy.
 
-⚠️ Note: This perfect score is expected due to the synthetic nature of the mock dataset. Real-world sensor data will include noise and variability, so similar performance should not be expected.
+Note: This perfect score is expected due to the synthetic nature of the mock dataset. Real-world sensor data will include noise and variability, so similar performance should not be expected.
 
-Preparing for Real Data
-
+*Preparing for Real Data
+*
 The mpu6050_builder.py script is fully implemented and ready to run on actual MPU6050 sensor data once it becomes available.
 
 Akhona’s preprocessed data has been integrated into the IRIS_ML repository and stored in the appropriate folders to ensure seamless access for training and testing.
 
 The data pipeline is organized so that when real sensor data arrives, it can be processed immediately, allowing the model to be evaluated and tuned accordingly.
 
-Branch Purpose
-
+*Branch Purpose
+*
 This branch serves as a proof-of-concept for the MPU6050 drowsiness prediction model. It includes all necessary scripts, data organization, and documentation for future testing with real sensor inputs.
 
 # IRIS Year-End Project
