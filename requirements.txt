@@ -6,6 +6,7 @@ scipy
 matplotlib
 streamlit
 tensorflow
-
+bleak
 # Optional: for enhanced CSV handling and visualization
+csv
 seaborn
