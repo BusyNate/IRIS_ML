@@ -4,6 +4,13 @@ import ast
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
+from data_cleaning.preprocess_blink_from_dataset import clean_blink_data
+
+#pre-processed datasets(false data)
+RAW_DATA_PATH = "C:/Users/mndiw/Documents/IRIS_ML/data/dataset.csv"
+CLEAN_DATA_PATH = "C:/Users/mndiw/Documents/IRIS_ML/outputs/clean_blink.csv"
+
+clean_blink_data(RAW_DATA_PATH, CLEAN_DATA_PATH)
 
 # -----------------------------
 # Config

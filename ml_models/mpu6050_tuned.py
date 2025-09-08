@@ -3,6 +3,7 @@ import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
+from data_cleaning.preprocess_inertial import clean_inertial_data
 
 # Configurable parameters
 sampling_rate = 50  # Hz (adjust to match ESP32)
@@ -29,6 +30,13 @@ def extract_features_mpu(X, y, window_size, step):
         ys.append(y[i+window_size-1])
     return np.array(Xs), np.array(ys)
 
+# Define file paths
+input_raw_csv = "C:/Users/mndiw/Documents/IRIS_ML/data/inertial/raw_inertial.csv"
+output_clean_csv = "C:/Users/mndiw/Documents/IRIS_ML/outputs/clean_inertial.csv"
+
+# First, clean the data
+clean_inertial_data(input_raw_csv, output_clean_csv)
+
 # Load dataset
 df = pd.read_csv("C:/Users/mndiw/Documents/IRIS_ML/data/inertial/raw_inertial.csv")  # timestamp, ay, gx, label
 X = df[["acc_y", "gyro_x"]]
@@ -39,7 +47,6 @@ X_feat, y_feat = extract_features_mpu(X, y, window_size, step)
 
 if len(X_feat) <= 0:
     raise ValueError(f"Dataset too small! Need at least {window_size} rows, got {len(X)}.")
-
 
 # Train-test split
 X_train, X_test, y_train, y_test = train_test_split(
