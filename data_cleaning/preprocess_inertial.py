@@ -22,7 +22,7 @@ def load_and_clean_csv(file_path, output_path):
 
     os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
     df.to_csv(output_path, index=False)
-    print(f"✅ Cleaned inertial dataset saved to {output_path}")
+    print(f"Cleaned inertial dataset saved to {output_path}")
 
 if __name__ == "__main__":
     load_and_clean_csv("dataset/inertial/raw_inertial.csv", "outputs/clean_inertial.csv")
