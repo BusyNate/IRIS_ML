@@ -1,21 +1,31 @@
 import pandas as pd
+import os
 
 def clean_blink_data(input_csv, output_csv):
-    """Load blink dataset, normalize pixel values, save cleaned version"""
     df = pd.read_csv(input_csv)
 
-    # Drop rows with missing values
-    df = df.dropna()
-
-    # Normalize all numeric columns (scale 0–1)
+    # Convert all columns to numeric, invalid strings become NaN
     for col in df.columns:
-        if col != "label":  # don't normalize labels
-            df[col] = (df[col] - df[col].min()) / (df[col].max() - df[col].min())
+        df[col] = pd.to_numeric(df[col], errors='coerce')
+
+    # Drop rows that are completely NaN
+    df.dropna(how='all', inplace=True)
+
+    # Normalize numeric columns only
+    numeric_cols = df.select_dtypes(include=['number']).columns
+    for col in numeric_cols:
+        min_val = df[col].min()
+        max_val = df[col].max()
+        if min_val != max_val:
+            df[col] = (df[col] - min_val) / (max_val - min_val)
+        else:
+            df[col] = 0
 
     df.to_csv(output_csv, index=False)
-    print(f"Blink dataset cleaned and saved to {output_csv}")
+    print(f"Blink data cleaned and saved to {output_csv}")
 
 if __name__ == "__main__":
-    input_csv = "../data/dataset.csv"         # raw dataset
-    output_csv = "../outputs/clean_blink.csv" # cleaned output
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    input_csv = os.path.join(base_dir, "dataset.csv")  
+    output_csv = os.path.join(base_dir, "blink_dataset_cleaned.csv")
     clean_blink_data(input_csv, output_csv)

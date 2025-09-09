@@ -1,27 +1,31 @@
 import pandas as pd
-from scipy.signal import savgol_filter
+import os
 
 def clean_inertial_data(input_csv, output_csv):
-    """Load inertial dataset, normalize values, smooth signals"""
     df = pd.read_csv(input_csv)
 
-    # Drop rows with missing values
-    df = df.dropna()
-
-    # Normalize accelerometer/gyro values (scale 0–1)
+    # Convert all columns to numeric
     for col in df.columns:
-        if col not in ["timestamp", "label"]:
-            df[col] = (df[col] - df[col].min()) / (df[col].max() - df[col].min())
+        df[col] = pd.to_numeric(df[col], errors='coerce')
 
-    # Apply smoothing filter
-    for col in df.columns:
-        if col not in ["timestamp", "label"]:
-            df[col] = savgol_filter(df[col], 5, 2)
+    # Drop rows that are completely NaN
+    df.dropna(how='all', inplace=True)
+
+    # Normalize numeric columns
+    numeric_cols = df.select_dtypes(include=['number']).columns
+    for col in numeric_cols:
+        min_val = df[col].min()
+        max_val = df[col].max()
+        if min_val != max_val:
+            df[col] = (df[col] - min_val) / (max_val - min_val)
+        else:
+            df[col] = 0
 
     df.to_csv(output_csv, index=False)
-    print(f"Inertial dataset cleaned and saved to {output_csv}")
+    print(f"Inertial data cleaned and saved to {output_csv}")
 
 if __name__ == "__main__":
-    input_csv = "../data/inertial_raw.csv"         # raw inertial data
-    output_csv = "../outputs/clean_inertial.csv"   # cleaned output
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    input_csv = os.path.join(base_dir, "inertial_dataset.csv")  
+    output_csv = os.path.join(base_dir, "inertial_dataset_cleaned.csv")
     clean_inertial_data(input_csv, output_csv)
